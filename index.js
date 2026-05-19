@@ -5,6 +5,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+// TUYA CONFIG
 const tuya = new TuyaContext({
   baseUrl: 'https://openapi.tuyaeu.com',
   accessKey: process.env.ACCESS_ID,
@@ -13,15 +14,17 @@ const tuya = new TuyaContext({
 
 const DEVICE_ID = process.env.DEVICE_ID;
 
+// TEST
 app.get('/', (req, res) => {
   res.send('Server running');
 });
 
+// LIGHT ON
 app.get('/on', async (req, res) => {
   try {
-    await tuya.request({
+    const response = await tuya.request({
       method: 'POST',
-      path: `/v1.0/iot-03/devices/${DEVICE_ID}/commands`,
+      path: /v1.0/iot-03/devices/${DEVICE_ID}/commands,
       body: {
         commands: [
           {
@@ -32,18 +35,21 @@ app.get('/on', async (req, res) => {
       }
     });
 
+    console.log('ON RESPONSE:', response);
+
     res.send('Light ON');
-  } catch (e) {
-    console.error(e);
-    res.status(500).send(e.message);
+  } catch (error) {
+    console.error('ON ERROR:', error);
+    res.status(500).send(error.message);
   }
 });
 
+// LIGHT OFF
 app.get('/off', async (req, res) => {
   try {
-    await tuya.request({
+    const response = await tuya.request({
       method: 'POST',
-      path: `/v1.0/iot-03/devices/${DEVICE_ID}/commands`,
+      path: /v1.0/iot-03/devices/${DEVICE_ID}/commands,
       body: {
         commands: [
           {
@@ -54,13 +60,16 @@ app.get('/off', async (req, res) => {
       }
     });
 
+    console.log('OFF RESPONSE:', response);
+
     res.send('Light OFF');
-  } catch (e) {
-    console.error(e);
-    res.status(500).send(e.message);
+  } catch (error) {
+    console.error('OFF ERROR:', error);
+    res.status(500).send(error.message);
   }
 });
 
+// START SERVER
 app.listen(PORT, () => {
   console.log(Server started on port ${PORT});
 });
