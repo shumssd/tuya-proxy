@@ -43,7 +43,7 @@ app.get('/off', async (req, res) => {
   try {
     await tuya.request({
       method: 'POST',
-      path: /v1.0/iot-03/devices/${DEVICE_ID}/commands,
+      path: `/v1.0/iot-03/devices/${DEVICE_ID}/commands`,
       body: {
         commands: [
           {
