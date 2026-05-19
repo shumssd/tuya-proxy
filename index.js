@@ -1,76 +1,23 @@
-const http = require('http');
-const https = require('https');
-const crypto = require('crypto');
+const express = require('express');
 
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const DEVICE_ID = process.env.DEVICE_ID;
-const BASE_URL = 'openapi.tuyaeu.com';
+const app = express();
 
-function hmac(str, secret) {
-  return crypto.createHmac('sha256', secret)
-    .update(str).digest('hex').toUpperCase();
-}
+const PORT = process.env.PORT || 3000;
 
-function apiRequest(path, method, token, body) {
-  return new Promise((resolve, reject) => {
-    const t = Date.now().toString();
-    const signStr = token
-      ? CLIENT_ID + token + t
-      : CLIENT_ID + t;
-    const sign = hmac(signStr, CLIENT_SECRET);
-    const bodyStr = body ? JSON.stringify(body) : '';
-    const headers = {
-      'client_id': CLIENT_ID,
-      'sign': sign,
-      't': t,
-      'sign_method': 'HMAC-SHA256',
-      'Content-Type': 'application/json'
-    };
-    if (token) headers['access_token'] = token;
-    const options = {
-      hostname: BASE_URL,
-      path: path,
-      method: method,
-      headers: headers
-    };
-    const req = https.request(options, res => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(JSON.parse(data)));
-    });
-    req.on('error', reject);
-    if (bodyStr) req.write(bodyStr);
-    req.end();
-  });
-}
-
-async function getToken() {
-  const res = await apiRequest('/v1.0/token?grant_type=1', 'GET', null, null);
-  return res.result.access_token;
-}
-
-async function controlDevice(value) {
-  const token = await getToken();
-  return await apiRequest(
-    `/v1.0/devices/${DEVICE_ID}/commands`,
-    'POST',
-    token,
-    { commands: [{ code: 'switch_1', value: value }] }
-  );
-}
-
-const server = http.createServer(async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  if (req.url === '/on') {
-    await controlDevice(true);
-    res.end('OK');
-  } else if (req.url === '/off') {
-    await controlDevice(false);
-    res.end('OK');
-  } else {
-    res.end('Tuya Proxy Running');
-  }
+app.get('/', (req, res) => {
+  res.send('Server running');
 });
 
-server.listen(process.env.PORT || 3000);
+app.get('/on', async (req, res) => {
+  console.log('LIGHT ON');
+  res.send('Light ON');
+});
+
+app.get('/off', async (req, res) => {
+  console.log('LIGHT OFF');
+  res.send('Light OFF');
+});
+
+app.listen(PORT, () => {
+  console.log(Server started on port ${PORT});
+});
