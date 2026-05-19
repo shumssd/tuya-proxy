@@ -53,7 +53,7 @@ async function getToken() {
 async function controlDevice(value) {
   const token = await getToken();
   return await apiRequest(
-    /v1.0/devices/${DEVICE_ID}/commands,
+    `/v1.0/devices/${DEVICE_ID}/commands`,
     'POST',
     token,
     { commands: [{ code: 'switch_1', value: value }] }
